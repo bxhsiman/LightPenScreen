@@ -1,0 +1,32 @@
+# Quartus 编译输出文件
+output_files/
+incremental_db/
+db/
+
+# Quartus 临时文件
+*.rpt
+*.chg
+*.summary
+*.qws
+*.qdf
+*.qpf
+*.qsf
+*.done
+*.jdi
+*.qws
+*.smsg
+*.pin
+*.sof
+*.pof
+temp/
+
+# Quartus 日志文件
+*.log
+
+# Quartus 调试文件
+*.bak
+*.sld
+*.qdf
+
+# 仿真文件暂时不追踪
+simulation/
