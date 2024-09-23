@@ -27,6 +27,8 @@ temp/
 *.bak
 *.sld
 *.qdf
+.qsys_edit/
 
 # 仿真文件暂时不追踪
 simulation/
+sim/

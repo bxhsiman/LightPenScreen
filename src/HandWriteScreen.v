@@ -1,16 +1,18 @@
 module HandWriteScreen (
 	input clk,
-	input [31:0] data,
-	output reg [7:0] cat,
-	output reg [7:0] seg 
+	output wire [7:0] cat_o,
+	output wire [7:0] seg_0
 	);
-	
+
+	// 定义内部寄存器
+	reg [31:0] data_value = 32'h23456789;
+
+	// 实例化 hex_display 模块，并连接信号
 	hex_display hex_display_inst (
 		.clk(clk),
-		.data(data),
-		.cat(cat),
-		.seg(seg)
+		.data(data_value),
+		.cat(cat_o),
+		.seg(seg_0)
 	);
 
 endmodule
-	

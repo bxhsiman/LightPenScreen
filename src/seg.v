@@ -1,17 +1,16 @@
 // Seg Driver for 32bit 7-segment display
 module hex_display(
     input wire clk,
-    input wire [31:0] data,       // 8 hexadecimal digits
-    output reg [7:0] cat,         // Common cathodes
-    output reg [7:0] seg          // Segment control (AA, AB, AC, etc.)
+    input wire [31:0] data,      
+    output reg [7:0] cat,  // 阴极选择      
+    output reg [7:0] seg   // 段码输出       
 );
 
-// Internal variables
-reg [2:0] digit_index;            // Keeps track of which digit to scan
-reg [3:0] current_digit;          // Current 4-bit hex value for display
-wire [7:0] segments;              // Encoded segment output
+reg [2:0] digit_index;           
+reg [3:0] current_digit;        
+wire [7:0] segments;           
 
-// Hex to 7-segment decoder
+// HEX 译码器
 function [7:0] hex_to_7seg;
     input [3:0] hex;
     begin
@@ -32,14 +31,19 @@ function [7:0] hex_to_7seg;
             4'hD: hex_to_7seg = 8'b10000101; // D
             4'hE: hex_to_7seg = 8'b01100001; // E
             4'hF: hex_to_7seg = 8'b01110001; // F
-            default: hex_to_7seg = 8'b11111111; // Blank
+            default: hex_to_7seg = 8'b11111111;
         endcase
     end
 endfunction
 
-// Scanning logic: Update the display every clock cycle
+initial begin
+    digit_index = 3'b000;
+    current_digit = 4'b0000;
+    cat = 8'b11111111;
+    seg = 8'b11111111;
+end
+
 always @(posedge clk) begin
-    // Select the current digit to display based on digit_index
     case (digit_index)
         3'b000: current_digit = data[3:0];
         3'b001: current_digit = data[7:4];
@@ -51,13 +55,10 @@ always @(posedge clk) begin
         3'b111: current_digit = data[31:28];
     endcase
     
-    // Convert hex value to 7-segment display code
-    seg = hex_to_7seg(current_digit);
+    seg = ~hex_to_7seg(current_digit);
     
-    // Activate only the current digit's cathode
     cat = ~(8'b00000001 << digit_index);
     
-    // Move to the next digit on the next clock cycle
     digit_index <= digit_index + 1;
 end
 
