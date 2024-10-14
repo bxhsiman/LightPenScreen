@@ -1,8 +1,8 @@
 // LED点阵驱动模块
 
-`include "include/st_state.v"
-`include "include/system_para.v"
-`include "include/led_para.v"
+`include "st_state.v"
+`include "system_para.v"
+`include "led_para.v"
 
 module led_driver (
     input wire clk,            // 时钟输入

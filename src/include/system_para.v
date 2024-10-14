@@ -2,7 +2,7 @@
 `ifndef SYSTEM_PARA_V
 `define SYSTEM_PARA_V
 
-`define CLOCK_FREQ 1000 // 1KHz
+`define CLOCK_FREQ 1_000_000 // 1MHz
 
 
 
