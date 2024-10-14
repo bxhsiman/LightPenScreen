@@ -2,6 +2,7 @@
 
 `include "include/st_state.v"
 `include "include/system_para.v"
+`include "include/led_para.v"
 
 module led_driver (
     input wire clk,            // 时钟输入
@@ -10,19 +11,17 @@ module led_driver (
     input wire [2:0] state,    // 状态机状态 //TBD
     output reg rst_ok,         // 复位完成信号 //回传状态机 TBD
 
+    input wire we,             //光笔输入信号
+
     output reg [7:0] output_row,
     output reg [7:0] output_col_r,
     output reg [7:0] output_col_g
 
     // for test
-    , output reg [3:0] ram_data
-    , input wire we
+    , output wire [3:0] ram_data
     , input wire [3:0] data
 );
 
-    parameter led_on = 255;
-    parameter led_scan = 128;
-    parameter led_off = 0;
     
     reg [7:0] duty;
     wire [7:0] led_row;
@@ -46,18 +45,37 @@ module led_driver (
         .led_col(led_col)
     );
 
-    // 实例化 LED 显存
-    // wire [3:0] ram_data;
-    // wire we;
-    // wire [3:0] data;
+    // 光笔选色器
+    wire [1:0] color = 2'b0;          //当前选中的颜色 TBD
+
+    //LED 显存 读写
+    reg [3:0] ram_write_data;  //待写入
+
+    // TEST 是否有错位可能？
+    always @(posedge clk) begin
+        case(state)
+            `LIGHT, `DRAW, `WRITE: begin
+                ram_write_data <= {1'b1 , 1'b0 , 1'b1 , 1'b0}; //变亮
+            end
+            `ERASE: begin
+                ram_write_data <= {1'b1 , 1'b0 , 1'b0 , 1'b0}; //变暗
+            end
+            `COLOR: begin
+                ram_write_data <= { 1'b1, color, 1'b0 }; //选色
+            end
+        default: begin
+            ram_write_data <= 4'b0; // RST SLEEP 等模式 暂时清空 TBT
+        end
+        endcase
+    end
 
     led_ram led_ram_inst (
         .clk(clk),
         .rst_n(rst_n),
-        .data(4'b0),
+        .data(ram_write_data),
         .addr_row(led_row),
         .addr_col(led_col),
-        .we(1'b0),
+        .we(we),
         .led_data(ram_data)
     );
 
@@ -66,12 +84,12 @@ module led_driver (
     reg col_g_en;
     always @(led_row or led_col) begin
         if (ram_data[3] == 1'b1) begin
-            duty <= led_on;
+            duty <= `PWM_HIGH_COUNT;
             col_r_en <= ram_data[1];
             col_g_en <= ram_data[2];
         end
         else begin
-            duty <= led_scan;
+            duty <= `PWM_LOW_COUNT;
             col_g_en <= 1'b0;
             col_r_en <= 1'b1;
         end
