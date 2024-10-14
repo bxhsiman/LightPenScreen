@@ -3,7 +3,7 @@ module HandWriteScreen (
 	input rst,
 
 	output wire [7:0] cat_o,
-	output wire [7:0] seg_0,
+	output wire [7:0] seg_o,
 
 	output wire [7:0] output_row,
 	output wire [7:0] output_col_r,
@@ -20,7 +20,7 @@ module HandWriteScreen (
 		.clk(clk),
 		.data(data_value),
 		.cat(cat_o),
-		.seg(seg_0)
+		.seg(seg_o)
 	);
 
 	// 实例化 led_driver 模块，并连接信号

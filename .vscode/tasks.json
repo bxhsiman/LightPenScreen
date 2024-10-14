@@ -1,0 +1,21 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "type": "shell",
+            "command": "iverilog",
+            "args": [
+                "-I", "${workspaceFolder}/include",
+                "-o", "${workspaceFolder}/build/build",
+                "${workspaceFolder}/src/HandWriteScreen.v"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": [],
+            "detail": "Compile Verilog files using iverilog"
+        }
+    ]
+}
