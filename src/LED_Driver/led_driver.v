@@ -109,7 +109,7 @@ module led_driver (
             `RST: begin
                 // 全红 全绿 两次闪烁
                 output_row <= 8'hff;
-                if (rst_cnt > (`CLOCK_FREQ >> 1)) begin
+                if (rst_cnt > (`CLOCK_FREQ / 2)) begin
                     rst_cnt <= 0;
                     rst_led_state = rst_led_state + 1;
                 end
@@ -135,7 +135,11 @@ module led_driver (
                     end
                 endcase
             end
-            default begin
+
+            default: begin
+                rst_cnt <= 0;
+                rst_led_state <= 2'b00;
+                rst_ok <= 1'b0;
                 //TBD 当前仅一个状态 检查是否其他状态只需要操作显存即可
                 output_row <= led_row;
                 output_col_r <= led_col & {8{col_r_en & pwm_out}};

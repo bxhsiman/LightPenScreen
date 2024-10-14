@@ -14,6 +14,9 @@ module HandWriteScreen (
 	output wire [7:0] output_row,
 	output wire [7:0] output_col_r,
 	output wire [7:0] output_col_g
+
+	//for test
+	, output wire rst_ok_o
 	);
 
 	assign rst_n = ~rst;
@@ -36,6 +39,7 @@ module HandWriteScreen (
 	// st 模块信号
 	wire [2:0] state;
 	wire rst_ok;
+	assign rst_ok_o = rst_ok;
 	// 实例化 st 模块，并连接信号
 	st st_inst (
 		.clk(clk),
@@ -71,7 +75,13 @@ module HandWriteScreen (
 			`COLOR: begin
 				data_value <= 32'h0000_0006;
 			end
-			default: data_value <= 32'h0000_0000;
+			`STOP: begin
+				data_value <= 32'h0000_0007;
+			end
+			default: begin
+				data_value <= 32'hFFFF_FFFF;
+			end
+
 		endcase
 	end
 
