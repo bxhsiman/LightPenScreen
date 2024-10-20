@@ -17,9 +17,13 @@ module HandWriteScreen (
 
 	//for test
 	, output wire rst_ok_o
+	, output wire [3:0] ram_data_o
+	
 	);
 
 	assign rst_n = ~rst;
+	assign we_n = ~we; //信号需反转
+
 	wire btn0_o, btn1_o; 
 	// 按钮消抖模块
 	btn btn0_inst (
@@ -39,7 +43,8 @@ module HandWriteScreen (
 	// st 模块信号
 	wire [2:0] state;
 	wire rst_ok;
-	assign rst_ok_o = rst_ok;
+	assign rst_ok_o = we_n; //testing we singal
+
 	// 实例化 st 模块，并连接信号
 	st st_inst (
 		.clk(clk),
@@ -99,10 +104,12 @@ module HandWriteScreen (
 		.rst_n(rst_n),
 		.state(state),
 		.rst_ok(rst_ok),
-		.we(we),
+		.we(we_n),
 		.output_row(output_row),
 		.output_col_r(output_col_r),
 		.output_col_g(output_col_g)
+
+		,.ram_data_o(ram_data_o)
 	);
 
 endmodule

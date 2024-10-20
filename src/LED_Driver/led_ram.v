@@ -25,7 +25,7 @@ module led_ram (
             // 初始化 RAM
             for (i = 0; i < 8; i = i + 1) begin
                 for (j = 0; j < 8; j = j + 1) begin
-                    ram[i][j] <= 4'b0;  // 初始化为 0
+                    ram[i][j] <= 4'b1110;  // 初始化为 1 for test
                 end
             end
         end

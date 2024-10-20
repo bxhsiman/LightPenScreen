@@ -1,4 +1,5 @@
 // LED点阵驱动模块
+// col高 row低驱动
 
 `include "st_state.v"
 `include "system_para.v"
@@ -17,9 +18,9 @@ module led_driver (
     output reg [7:0] output_col_r,
     output reg [7:0] output_col_g
 
-    // for test
-    , output wire [3:0] ram_data
-    , input wire [3:0] data
+    //for test
+    , output wire [3:0] ram_data_o
+
 );
 
     
@@ -50,6 +51,7 @@ module led_driver (
 
     //LED 显存 读写
     reg [3:0] ram_write_data;  //待写入
+    wire [3:0] ram_data;       //读出
 
     // TEST 是否有错位可能？
     always @(posedge clk) begin
@@ -68,7 +70,7 @@ module led_driver (
         end
         endcase
     end
-
+    // 检查这里的时序！
     led_ram led_ram_inst (
         .clk(clk),
         .rst_n(rst_n),
@@ -82,16 +84,23 @@ module led_driver (
     //显存内容解析
     reg col_r_en;
     reg col_g_en;
-    always @(led_row or led_col) begin
+    always @(posedge clk) begin
         if (ram_data[3] == 1'b1) begin
             duty <= `PWM_HIGH_COUNT;
             col_r_en <= ram_data[1];
             col_g_en <= ram_data[2];
         end
         else begin
-            duty <= `PWM_LOW_COUNT;
-            col_g_en <= 1'b0;
-            col_r_en <= 1'b1;
+            if (state == `DRAW) begin
+                duty <= `PWM_HIGH_COUNT;
+                col_g_en <= 1'b0;
+                col_r_en <= 1'b1;
+            end
+            else begin
+                duty <= `PWM_LOW_COUNT;
+                col_g_en <= 1'b0;
+                col_r_en <= 1'b1;
+            end
         end
     end
 
@@ -108,30 +117,31 @@ module led_driver (
             end
             `RST: begin
                 // 全红 全绿 两次闪烁
-                output_row <= 8'hff;
-                if (rst_cnt > (`CLOCK_FREQ / 2)) begin
+                if (rst_cnt >= `CLOCK_FREQ) begin
                     rst_cnt <= 0;
-                    rst_led_state = rst_led_state + 1;
+                    rst_led_state <= rst_led_state + 1;
                 end
                 rst_cnt <= rst_cnt + 1;
-
                 case (rst_led_state)
                     2'b00, 2'b10: begin
                         output_col_r <= 8'hff;
                         output_col_g <= 8'h00;
+                        output_row <= 8'h00;
+
                     end
                     2'b01: begin
                         output_col_r <= 8'h00;
                         output_col_g <= 8'hff;
+                        output_row <= 8'h00;
                     end
                     2'b11: begin
                         output_col_r <= 8'h00;
-                        output_col_g <= 8'h00;
+                        output_col_g <= 8'hff;
+                        output_row <= 8'h00;
                         rst_ok <= 1'b1;
                     end
                     default: begin
-                        output_col_r <= 8'h00;
-                        output_col_g <= 8'hff;
+                        output_row <= 8'hff;
                     end
                 endcase
             end
@@ -141,11 +151,14 @@ module led_driver (
                 rst_led_state <= 2'b00;
                 rst_ok <= 1'b0;
                 //TBD 当前仅一个状态 检查是否其他状态只需要操作显存即可
-                output_row <= led_row;
+                output_row <= ~led_row;
                 output_col_r <= led_col & {8{col_r_en & pwm_out}};
                 output_col_g <= led_col & {8{col_g_en & pwm_out}};
             end
         
         endcase         
     end
+
+    assign ram_data_o = ram_data; //for test
+
 endmodule
