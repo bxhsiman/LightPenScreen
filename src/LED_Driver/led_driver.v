@@ -55,21 +55,24 @@ module led_driver (
 
     // TEST 是否有错位可能？
     always @(posedge clk) begin
-        case(state)
-            `LIGHT, `DRAW, `WRITE: begin
-                ram_write_data <= {1'b1 , 1'b0 , 1'b1 , 1'b0}; //变亮
+        if (we) begin
+            case(state)
+                `LIGHT, `DRAW, `WRITE: begin
+                    ram_write_data <= {1'b1 , 1'b0 , 1'b1 , 1'b0}; //变亮
+                end
+                `ERASE: begin
+                    ram_write_data <= {1'b1 , 1'b0 , 1'b0 , 1'b0}; //变暗
+                end
+                `COLOR: begin
+                    ram_write_data <= { 1'b1, color, 1'b0 }; //选色
+                end
+            default: begin
+                ram_write_data <= ram_data; // RST SLEEP 等模式 保留原始值
             end
-            `ERASE: begin
-                ram_write_data <= {1'b1 , 1'b0 , 1'b0 , 1'b0}; //变暗
-            end
-            `COLOR: begin
-                ram_write_data <= { 1'b1, color, 1'b0 }; //选色
-            end
-        default: begin
-            ram_write_data <= 4'b0; // RST SLEEP 等模式 暂时清空 TBT
+            endcase
         end
-        endcase
     end
+
     // 检查这里的时序！
     led_ram led_ram_inst (
         .clk(clk),

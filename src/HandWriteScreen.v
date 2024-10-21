@@ -97,7 +97,7 @@ module HandWriteScreen (
 	);
 
 
-
+	
 	// 实例化 led_driver 模块，并连接信号
 	led_driver led (
 		.clk(clk),
@@ -109,10 +109,9 @@ module HandWriteScreen (
 		.output_col_r(output_col_r),
 		.output_col_g(output_col_g)
 
-		,.ram_data_o(ram_data_o)
+		,.ram_data_o(test_led[4:1])
 	);
 
 	
-	assign test_led[0] = we_n; 
-	assign test_led[4:1] = ram_data_o;
+	assign test_led[0] = we_n;
 endmodule
