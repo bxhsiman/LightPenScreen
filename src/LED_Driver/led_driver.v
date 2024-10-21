@@ -105,7 +105,7 @@ module led_driver (
     end
 
     reg [31:0] rst_cnt; //重启计数器
-    reg [1:0] rst_led_state; //led状态
+    reg [2:0] rst_led_state; //led状态
 
     // 输出-状态选择器
     always @(posedge clk) begin
@@ -117,27 +117,33 @@ module led_driver (
             end
             `RST: begin
                 // 全红 全绿 两次闪烁
+                rst_cnt <= rst_cnt + 1;
                 if (rst_cnt >= `CLOCK_FREQ) begin
                     rst_cnt <= 0;
                     rst_led_state <= rst_led_state + 1;
                 end
-                rst_cnt <= rst_cnt + 1;
                 case (rst_led_state)
-                    2'b00, 2'b10: begin
+                    3'b000, 3'b010: begin
                         output_col_r <= 8'hff;
                         output_col_g <= 8'h00;
                         output_row <= 8'h00;
 
                     end
-                    2'b01: begin
+                    3'b001: begin
                         output_col_r <= 8'h00;
                         output_col_g <= 8'hff;
                         output_row <= 8'h00;
                     end
-                    2'b11: begin
+                    3'b011: begin
                         output_col_r <= 8'h00;
                         output_col_g <= 8'hff;
                         output_row <= 8'h00;
+                        
+                    end
+                    3'b100: begin
+                        output_col_r <= 8'h00;
+                        output_col_g <= 8'h00;
+                        output_row <= 8'hff;
                         rst_ok <= 1'b1;
                     end
                     default: begin

@@ -16,8 +16,7 @@ module HandWriteScreen (
 	output wire [7:0] output_col_g
 
 	//for test
-	, output wire rst_ok_o
-	, output wire [3:0] ram_data_o
+	, output wire [15:0] test_led
 	
 	);
 
@@ -43,7 +42,6 @@ module HandWriteScreen (
 	// st 模块信号
 	wire [2:0] state;
 	wire rst_ok;
-	assign rst_ok_o = we_n; //testing we singal
 
 	// 实例化 st 模块，并连接信号
 	st st_inst (
@@ -98,6 +96,8 @@ module HandWriteScreen (
 		.seg(seg_o)
 	);
 
+
+
 	// 实例化 led_driver 模块，并连接信号
 	led_driver led (
 		.clk(clk),
@@ -112,4 +112,7 @@ module HandWriteScreen (
 		,.ram_data_o(ram_data_o)
 	);
 
+	
+	assign test_led[0] = we_n; 
+	assign test_led[4:1] = ram_data_o;
 endmodule

@@ -6,15 +6,15 @@ module led_ram (
     input wire rst_n,          // 异步复位（低电平有效）
     
     input wire [3:0] data,     // LED 数据输入
-    input wire [7:0] addr_row,     // 地址输入row
-    input wire [7:0] addr_col,     // 地址输入col
+    input wire [2:0] addr_row, // 地址输入row (3 bit to index 8 rows)
+    input wire [2:0] addr_col, // 地址输入col (3 bit to index 8 cols)
     input wire we,             // 写使能
 
-    output reg [3:0] led_data   // LED 数据输出
+    output reg [3:0] led_data  // LED 数据输出
 );
 
     // 定义内部寄存器
-    reg [3:0] ram [7:0][7:0];          // 8*8*4bit RAM
+    reg [3:0] ram [7:0][7:0];   // 8x8x4bit RAM
 
     integer i, j; 
 
@@ -25,7 +25,7 @@ module led_ram (
             // 初始化 RAM
             for (i = 0; i < 8; i = i + 1) begin
                 for (j = 0; j < 8; j = j + 1) begin
-                    ram[i][j] <= 4'b1110;  // 初始化为 1 for test
+                    ram[i][j] <= 4'b0000;  // 初始化为 0 for test
                 end
             end
         end
@@ -33,9 +33,8 @@ module led_ram (
             if (we) begin
                 ram[addr_row][addr_col] <= data;
             end
+            led_data <= ram[addr_row][addr_col];  // 读取 RAM 的数据到输出
         end
     end
-
-    assign data_out = ram[addr_row][addr_col];  // 读出数据
 
 endmodule
