@@ -21,7 +21,17 @@ module HandWriteScreen (
 	);
 
 	assign rst_n = ~rst;
-	assign we_n = ~we; //信号需反转
+	assign we_n = we; //信号需反转-fortest
+
+	wire we_n_o;
+	// 光笔消抖模块
+	btn we_inst (
+		.clk(clk),
+		.rst_n(rst_n),
+		.button_in(we_n),
+		.button_out(we_n_o)
+	);
+
 
 	wire btn0_o, btn1_o; 
 	// 按钮消抖模块
@@ -104,7 +114,7 @@ module HandWriteScreen (
 		.rst_n(rst_n),
 		.state(state),
 		.rst_ok(rst_ok),
-		.we(we_n),
+		.we(we_n_o),
 		.output_row(output_row),
 		.output_col_r(output_col_r),
 		.output_col_g(output_col_g)

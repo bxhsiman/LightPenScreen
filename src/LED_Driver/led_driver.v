@@ -53,7 +53,7 @@ module led_driver (
     reg [3:0] ram_write_data;  //待写入
     wire [3:0] ram_data;       //读出
 
-    // TEST 是否有错位可能？
+
     always @(posedge clk) begin
         case(state)
             `LIGHT, `DRAW, `WRITE: begin
@@ -63,7 +63,7 @@ module led_driver (
                 ram_write_data <= {1'b1 , 1'b0 , 1'b0 , 1'b0}; //变暗
             end
             `COLOR: begin
-                ram_write_data <= { 1'b1, color, 1'b0 }; //选色
+                ram_write_data <= { 1'b1, color, 1'b0 }; //选用选色
             end
         default: begin
             ram_write_data <= ram_data; // RST SLEEP 等模式 保留原始值

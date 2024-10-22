@@ -28,7 +28,7 @@ always @(posedge clk or negedge rst_n) begin
         led_col <= 8'd1;    
     end
     else begin
-        if (timer < `SCAN_TIME) begin
+        if (timer <= `SCAN_TIME) begin
             timer <= timer + 1;
         end
         else begin
