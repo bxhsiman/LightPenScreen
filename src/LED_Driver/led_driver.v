@@ -53,14 +53,13 @@ module led_driver (
     reg [3:0] ram_write_data;  //待写入
     wire [3:0] ram_data;       //读出
 
-
     always @(posedge clk) begin
         case(state)
             `LIGHT, `DRAW, `WRITE: begin
-                ram_write_data <= {1'b1 , 1'b0 , 1'b1 , 1'b0}; //变亮
+                ram_write_data <= { 1'b1 , 1'b0 , 1'b1 , 1'b0 }; //变亮
             end
             `ERASE: begin
-                ram_write_data <= {1'b1 , 1'b0 , 1'b0 , 1'b0}; //变暗
+                ram_write_data <= { 1'b1 , 1'b0 , 1'b0 , 1'b0 }; //变暗
             end
             `COLOR: begin
                 ram_write_data <= { 1'b1, color, 1'b0 }; //选用选色
@@ -108,7 +107,7 @@ module led_driver (
     reg [31:0] rst_cnt; //重启计数器
     reg [2:0] rst_led_state; //led状态
 
-    // 输出-状态选择器
+    // 输出-状态选择器 TBD 将这个抽离成一个实例化
     always @(posedge clk) begin
         case (state)
             `STOP: begin

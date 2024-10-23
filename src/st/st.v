@@ -31,94 +31,94 @@ module st (
 
     // 状态机
     always @(posedge clk) begin
-            case (state_reg) 
-                `RST: begin
-                    if (rst_ok) begin
-                        state_reg <= `SLEEP;
-                    end
-                    else begin
-                        state_reg <= `RST;
-                    end
+        case (state_reg) 
+            `RST: begin
+                if (rst_ok) begin
+                    state_reg <= `SLEEP;
                 end
-                `SLEEP: begin
-                    if (rst_edge) begin
-                        state_reg <= `STOP;
-                    end
-                    else if (state_change_edge) begin
-                        state_reg <= `LIGHT;
-                    end 
-                    else begin
-                        state_reg <= `SLEEP;
-                    end
-                end
-                `LIGHT: begin
-                    if (rst_edge) begin
-                        state_reg <= `STOP;
-                    end
-                    else if (state_change_edge) begin
-                        state_reg <= `DRAW;
-                    end
-                    else begin
-                        state_reg <= `LIGHT;
-                    end
-                end
-                `DRAW: begin
-                    if (rst_edge) begin
-                        state_reg <= `STOP;
-                    end
-                    else if (state_change_edge) begin
-                        state_reg <= `WRITE;
-                    end
-                    else begin
-                        state_reg <= `DRAW;
-                    end
-                end
-                `WRITE: begin
-                    if (rst_edge) begin
-                        state_reg <= `STOP;
-                    end
-                    else if (state_change_edge) begin
-                        state_reg <= `ERASE;
-                    end
-                    else begin
-                        state_reg <= `WRITE;
-                    end
-                end
-                `ERASE: begin
-                    if (rst_edge) begin
-                        state_reg <= `STOP;
-                    end
-                    else if (state_change_edge) begin
-                        state_reg <= `COLOR;
-                    end
-                    else begin
-                        state_reg <= `ERASE;
-                    end
-                end
-                `COLOR: begin
-                    if (rst_edge) begin
-                        state_reg <= `STOP;
-                    end
-                    else if (state_change_edge) begin
-                        state_reg <= `LIGHT;
-                    end
-                    else begin
-                        state_reg <= `COLOR;
-                    end
-                end
-                `STOP: begin
-                    if (rst_edge) begin
-                        state_reg <= `RST;
-                    end
-                    else begin
-                        state_reg <= `STOP;
-                    end
-                end
-                default: begin
+                else begin
                     state_reg <= `RST;
                 end
-            endcase
-        end
+            end
+            `SLEEP: begin
+                if (rst_edge) begin
+                    state_reg <= `STOP;
+                end
+                else if (state_change_edge) begin
+                    state_reg <= `LIGHT;
+                end 
+                else begin
+                    state_reg <= `SLEEP;
+                end
+            end
+            `LIGHT: begin
+                if (rst_edge) begin
+                    state_reg <= `STOP;
+                end
+                else if (state_change_edge) begin
+                    state_reg <= `DRAW;
+                end
+                else begin
+                    state_reg <= `LIGHT;
+                end
+            end
+            `DRAW: begin
+                if (rst_edge) begin
+                    state_reg <= `STOP;
+                end
+                else if (state_change_edge) begin
+                    state_reg <= `WRITE;
+                end
+                else begin
+                    state_reg <= `DRAW;
+                end
+            end
+            `WRITE: begin
+                if (rst_edge) begin
+                    state_reg <= `STOP;
+                end
+                else if (state_change_edge) begin
+                    state_reg <= `ERASE;
+                end
+                else begin
+                    state_reg <= `WRITE;
+                end
+            end
+            `ERASE: begin
+                if (rst_edge) begin
+                    state_reg <= `STOP;
+                end
+                else if (state_change_edge) begin
+                    state_reg <= `COLOR;
+                end
+                else begin
+                    state_reg <= `ERASE;
+                end
+            end
+            `COLOR: begin
+                if (rst_edge) begin
+                    state_reg <= `STOP;
+                end
+                else if (state_change_edge) begin
+                    state_reg <= `LIGHT;
+                end
+                else begin
+                    state_reg <= `COLOR;
+                end
+            end
+            `STOP: begin
+                if (rst_edge) begin
+                    state_reg <= `RST;
+                end
+                else begin
+                    state_reg <= `STOP;
+                end
+            end
+            default: begin
+                state_reg <= `RST;
+            end
+        endcase
+    end
 
     assign state = state_reg;
 

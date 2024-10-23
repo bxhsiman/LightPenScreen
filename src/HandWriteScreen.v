@@ -64,14 +64,38 @@ module HandWriteScreen (
 
 	// 定义内部寄存器 fortest
 	reg [31:0] data_value;
+	reg [7:0] seg_en; 
+	reg [31:0] rst_cnt; //重启计数器
+    reg [1:0] rst_seg_state; //段码状态
 
+	//数码管状态机 TBD 抽离到另一个部分
 	always @(posedge clk) begin
 		case (state)
 			`RST: begin
-				data_value <= 32'h0000_0000;
+				// 2HZ闪烁
+				// 全红 全绿 两次闪烁
+                rst_cnt <= rst_cnt + 1;
+                if (rst_cnt >= `CLOCK_FREQ) begin
+                    rst_cnt <= 0;
+                    rst_seg_state <= rst_seg_state + 1;
+                end
+				case (rst_seg_state) 
+					2'b00, 3'b01: begin
+						data_value <= 32'h8888_8888;
+						seg_en <= 8'b1111_1111;
+					end
+					2'b10,2'b11: begin
+						data_value <= 32'h8888_8888;
+						seg_en <= 8'b0000_0000;
+					end
+				endcase
+				data_value <= 32'h8888_8888;
 			end
 			`SLEEP: begin
-				data_value <= 32'h0000_0001;
+				rst_cnt <= 0;
+				rst_seg_state <= 0;
+				data_value <= 32'hAAA0_0000;
+				seg_en <= 8'b1110_0000;
 			end
 			`LIGHT: begin
 				data_value <= 32'h0000_0002;
@@ -103,10 +127,9 @@ module HandWriteScreen (
 		.clk(clk),
 		.data(data_value),
 		.cat(cat_o),
-		.seg(seg_o)
+		.seg(seg_o),
+		.enable(seg_en)
 	);
-
-
 	
 	// 实例化 led_driver 模块，并连接信号
 	led_driver led (
