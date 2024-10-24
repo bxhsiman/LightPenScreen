@@ -3,10 +3,13 @@
 `include "system_para.v"
 
 module seg_driver(
+    input wire clk,
+
     input wire [2:0] state,
     input wire [2:0] state_deep,
 
-    input wire clk,
+    input wire [2:0] row_d,
+    input wire [2:0] col_d,
 
     output wire [7:0] cat,        // 阴极选择      
     output wire [7:0] seg         // 段码输出   
@@ -15,6 +18,7 @@ module seg_driver(
 	// 内部寄存器
 	reg [31:0] seg_value; //段码显示
 	reg [7:0] seg_en;      //段码使能
+
 
 	//数码管组合逻辑
 	always @(*) begin
@@ -40,8 +44,8 @@ module seg_driver(
                 seg_en = 8'b1110_0000;
 			end
 			`LIGHT: begin
-				seg_value = 32'h1000_0000;
-                seg_en = 8'b1000_0000;
+				seg_value = {1'h1, 5'b0000_0,row_d, 5'b0000_0,col_d, 5'h0_0000};
+                seg_en = 8'b1110_0000;
 			end
 			`DRAW: begin
 				seg_value = 32'h2000_0000;

@@ -67,11 +67,17 @@ module HandWriteScreen (
 		.clk(clk),
 		.state(state),
     	.state_deep(state_deep),
+		
+		// 点亮mode功能所需信号
+		.row_d(row_d),
+		.col_d(col_d),
+		
     	.cat(cat_o),        
     	.seg(seg_o)        
 	);
 	
 	// 实例化 led_driver 模块
+	wire [2:0] row_d, col_d;
 	led_driver led (
 		.clk(clk),
 		.rst_n(rst_n),
@@ -80,7 +86,10 @@ module HandWriteScreen (
 		.we(we_n_o),
 		.output_row(output_row),
 		.output_col_r(output_col_r),
-		.output_col_g(output_col_g)
+		.output_col_g(output_col_g),
+
+		.row_d(row_d),
+		.col_d(col_d)
 
 		,.ram_data_o(test_led[4:1])
 	);

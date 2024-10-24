@@ -16,7 +16,10 @@ module led_driver (
 
     output reg [7:0] output_row,
     output reg [7:0] output_col_r,
-    output reg [7:0] output_col_g
+    output reg [7:0] output_col_g,
+
+    output wire [2:0] row_d,    // 刚写入的行地址
+    output wire [2:0] col_d    // 刚写入的列地址
 
     //for test
     , output wire [3:0] ram_data_o
@@ -69,21 +72,23 @@ module led_driver (
         endcase
     end
 
-    // 检查这里的时序！
     led_ram led_ram_inst (
         .clk(clk),
         .rst_n(rst_n),
+        .state(state),
         .data(ram_write_data),
         .addr_row(led_row),
         .addr_col(led_col),
         .we(we),
-        .led_data(ram_data)
+        .led_data(ram_data),
+        .col_d(col_d),
+        .row_d(row_d)
     );
 
-    //显存内容解析
+    //根据状态解析显存内容
     reg col_r_en;
     reg col_g_en;
-    always @(posedge clk) begin
+    always @(*) begin
         if (ram_data[3] == 1'b1) begin
             duty <= `PWM_HIGH_COUNT;
             col_r_en <= ram_data[1];
@@ -103,7 +108,7 @@ module led_driver (
         end
     end
 
-    //LED组合逻辑
+    //点阵屏组合逻辑
     always @(*) begin
         // 默认值
         output_row = 8'hFF;
@@ -132,8 +137,14 @@ module led_driver (
             end
             default: begin
                 output_row = ~led_row; // ROW低电平驱动
-                output_col_r = led_col & {8{col_r_en & pwm_out}};
-                output_col_g = led_col & {8{col_g_en & pwm_out}};
+                if (state == `REVERSE) begin //TBD 应当放入RAM中
+                    output_col_r = led_col & {8{~col_g_en & pwm_out}};
+                    output_col_g = led_col & {8{~col_r_en & pwm_out}};
+                end
+                else begin
+                    output_col_r = led_col & {8{col_r_en & pwm_out}};
+                    output_col_g = led_col & {8{col_g_en & pwm_out}};
+                end
             end
         
         endcase         

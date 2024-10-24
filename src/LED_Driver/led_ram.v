@@ -1,16 +1,21 @@
 module led_ram (
     input wire clk,            // 时钟输入
     input wire rst_n,          // 异步复位（低电平有效）
+
+    input wire state,          // 状态机状态
     
     input wire [3:0] data,     // LED 数据输入
     input wire [7:0] addr_row, // one-hot 编码的 row 地址输入
     input wire [7:0] addr_col, // one-hot 编码的 col 地址输入
     input wire we,             // 写使能
 
-    output reg [3:0] led_data  // LED 数据输出
+    output reg [3:0] led_data,  // LED 数据输出 
+    output reg [2:0] col_d,     // 刚写入的列地址
+    output reg [2:0] row_d     // 刚写入的行地址
+
 );
 
-    // 定义内部寄存器
+    // 定义内RAM
     reg [3:0] ram [7:0][7:0];   // 8x8x4bit RAM
 
     // 用于锁存的寄存器
@@ -18,10 +23,7 @@ module led_ram (
     reg [2:0] bin_row_reg;
     reg [2:0] bin_col_reg;
 
-    // 延迟的we信号，用于检测上升沿和下降沿
-    reg we_d; 
-
-    // 将 one-hot 编码转换为二进制编码的函数
+    // 编码转换
     function [2:0] onehot_to_bin;
         input [7:0] onehot;
         integer k;
@@ -34,13 +36,20 @@ module led_ram (
         end
     endfunction
 
-    // 延迟we信号，用于检测上升沿和下降沿
+    // state 切换检测
+    reg [2:0] state_d;
     always @(posedge clk or negedge rst_n) begin
         if (~rst_n) begin
-            we_d <= 1'b0;
+            state_d <= 1'b0;
         end else begin
-            we_d <= we;
+            state_d <= state;
         end
+    end
+
+    // we 上升沿检测
+	 reg we_d;
+    always @(posedge clk) begin
+        we_d <= we;
     end
 
     // 在we的上升沿锁存地址和数据
@@ -56,24 +65,27 @@ module led_ram (
         end
     end
 
-    // 在we的下降沿写入数据
-    always @(posedge clk or negedge rst_n) begin
-        integer i, j;  // 将变量声明移动到这里
-        if (~rst_n) begin
-            led_data <= 4'b0;
-            // 初始化 RAM
+    // RAM操作
+    always @(posedge clk) begin
+        integer i, j;
+        // STATE 变化的时候清空显存
+        if (state_d != state) begin
             for (i = 0; i < 8; i = i + 1) begin
                 for (j = 0; j < 8; j = j + 1) begin
-                    ram[i][j] <= 4'b0000;  // 初始化为 0
+                    ram[i][j] = 4'b0000;  // 初始化为 0
                 end
             end
-        end else begin
-            if (we_d && ~we) begin  // 检测we的下降沿
-                ram[bin_row_reg][bin_col_reg] <= data_reg;  // 写入锁存的数据和地址
-            end
-            // 读取当前地址的数据
-            led_data <= ram[bin_row_reg][bin_col_reg];
+            col_d = 3'd0;
+            row_d = 3'd0;
         end
+        // WE下降沿写入数据
+        else if (we_d && ~we) begin                  
+            ram[bin_row_reg][bin_col_reg] = data_reg; 
+            col_d = bin_col_reg;
+            row_d = bin_row_reg; 
+        end
+        // 读取当前地址的数据
+        led_data = ram[bin_row_reg][bin_col_reg];
     end
 
 endmodule
