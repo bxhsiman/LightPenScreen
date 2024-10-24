@@ -96,16 +96,9 @@ module led_driver (
             col_g_en = ram_data[2];
         end
         else begin
-            if (state == `DRAW) begin
-                duty = `PWM_HIGH_COUNT;
-                col_g_en = 1'b0;
-                col_r_en = 1'b1;
-            end
-            else begin
-                duty = `PWM_LOW_COUNT;
-                col_g_en = 1'b0;
-                col_r_en = 1'b1;
-            end
+            duty = `PWM_LOW_COUNT;
+            col_g_en = 1'b0;
+            col_r_en = 1'b1;
         end
     end
 
