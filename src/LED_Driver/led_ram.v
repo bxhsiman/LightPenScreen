@@ -22,18 +22,18 @@ module led_ram (
 
 );
 
-    // Define RAM as a single array (64x4 bits)
+    // LED RAM
     reg [3:0] ram [0:63];
 
-    // Helper variables
-    reg [7:0] col_buffer;      // Column address buffer
-    reg [2:0] row_buffer;      // Row address buffer
-    reg [3:0] data_buffer;     // Data buffer
-    reg [25:0] draw_timer;     // DRAW state timer (adjust width as needed)
-    reg buffer_empty;          // Buffer empty flag
-    reg buffer_full;           // Buffer full flag
+    //划亮用寄存器
+    reg [7:0] col_buffer;      
+    reg [2:0] row_buffer;      
+    reg [3:0] data_buffer;     
+    reg [25:0] draw_timer;     // 延迟触发计时器
+    reg buffer_empty;          
+    reg buffer_full;           
 
-    // Edge detection for 'we'
+    // we边沿检测
     reg we_d;
     wire we_edge;
     always @(posedge clk or negedge rst_n) begin
@@ -42,9 +42,18 @@ module led_ram (
         else
             we_d <= we;
     end
-    assign we_edge = ~we_d && we; // Detect rising edge of 'we'
+    assign we_edge = ~we_d && we;
 
-    // Convert one-hot to binary using a case statement
+    // we上升沿地址锁存
+    reg [7:0] addr_row_d, addr_col_d;
+    always @(posedge clk) begin
+        if (we_edge) begin
+            addr_row_d <= addr_row;
+            addr_col_d <= addr_col;
+        end
+    end
+
+    // one-hot 二进制转换
     function [2:0] onehot_to_bin;
         input [7:0] onehot;
         begin
@@ -66,7 +75,7 @@ module led_ram (
     assign bin_row = onehot_to_bin(addr_row);
     assign bin_col = onehot_to_bin(addr_col);
 
-    // State register to detect state changes
+    // 状态切换检测
     reg [3:0] state_d;
     always @(posedge clk or negedge rst_n) begin
         if (~rst_n)
@@ -75,39 +84,38 @@ module led_ram (
             state_d <= state;
     end
 
-    // RAM operations
+    // RAM 操作
     always @(posedge clk or negedge rst_n) begin
         if (~rst_n) begin
-            // Asynchronous reset
             col_d <= 3'd0;
             row_d <= 3'd0;
-            // Clear buffers and timer
+
+            //DRAW
             col_buffer   <= 8'd0;
             row_buffer   <= 3'd0;
             data_buffer  <= 4'd0;
             draw_timer   <= 26'd0; 
             buffer_empty <= 1'b1;
             buffer_full  <= 1'b0;
+
         end else begin
-            // Handle state changes
             if (state_d != state) begin
                 col_d <= 3'd0;
                 row_d <= 3'd0;
-                // Clear buffers and timer
+
                 col_buffer   <= 8'd0;
                 row_buffer   <= 3'd0;
                 data_buffer  <= 4'd0;
                 draw_timer   <= 26'd0;
                 buffer_empty <= 1'b1;
                 buffer_full  <= 1'b0;
+
+                // 清空RAM TBD
+
             end else begin
-                // State unchanged
                 if (state == `DRAW) begin
-                    // DRAW state
                     if (we_edge) begin
-                        // Detected we rising edge
                         if (buffer_empty) begin
-                            // Buffer is empty
                             row_buffer   <= bin_row;
                             data_buffer  <= data;
                             col_buffer[bin_col] <= 1'b1;
@@ -116,28 +124,24 @@ module led_ram (
                             draw_timer   <= 26'd0;
                         end else begin
                             if (bin_row == row_buffer) begin
-                                // Same row, update col_buffer
                                 col_buffer[bin_col] <= 1'b1;
                                 buffer_full  <= &col_buffer;
                                 draw_timer   <= 26'd0;
                             end
                         end
                     end else begin
-                        // No we edge
                         if (!buffer_empty) begin
                             draw_timer <= draw_timer + 1;
                             if (draw_timer >= `CLOCK_FREQ - 1) begin
-                                // Timeout, write to RAM
                                 integer col;
                                 for (col = 0; col < 8; col = col + 1) begin
                                     if (col_buffer[col]) begin
                                         ram[{row_buffer, col[2:0]}] <= data_buffer;
-                                        // Update col_d and row_d
                                         col_d <= col[2:0];
                                         row_d <= row_buffer;
                                     end
                                 end
-                                // Clear buffers and timer
+
                                 col_buffer   <= 8'd0;
                                 data_buffer  <= 4'd0;
                                 buffer_empty <= 1'b1;
@@ -146,39 +150,19 @@ module led_ram (
                             end
                         end
                     end
-
-                    // If buffer is full, write to RAM immediately
-                    if (buffer_full && !buffer_empty) begin
-                        integer col;
-                        for (col = 0; col < 8; col = col + 1) begin
-                            if (col_buffer[col]) begin
-                                ram[{row_buffer, col[2:0]}] <= data_buffer;
-                                // Update col_d and row_d
-                                col_d <= col[2:0];
-                                row_d <= row_buffer;
-                            end
-                        end
-                        // Clear buffers and timer
-                        col_buffer   <= 8'd0;
-                        data_buffer  <= 4'd0;
-                        buffer_empty <= 1'b1;
-                        buffer_full  <= 1'b0;
-                        draw_timer   <= 26'd0;
-                    end
                 end else begin
-                    // Non-DRAW state
-                    if (we_d && ~we) begin
-                        // Detected we falling edge
-                        ram[{bin_row, bin_col}] <= data;
-                        col_d <= bin_col;
-                        row_d <= bin_row;
+                    // 其他状态下的写操作
+                    if (we_d && ~we) begin // We 下降沿写入
+                        ram[{addr_row_d, addr_col_d}] <= data;
+                        col_d <= addr_row_d;
+                        row_d <= addr_col_d;
                     end
                 end
             end
         end
     end
 
-    // Read data from RAM (synchronous read)
+    // 读取RAM
     always @(posedge clk) begin
         led_data <= ram[{bin_row, bin_col}];
     end

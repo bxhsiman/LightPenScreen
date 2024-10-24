@@ -91,12 +91,12 @@ module led_driver (
     reg col_g_en;
     always @(*) begin
         if (ram_data[3] == 1'b1) begin
-            duty = `PWM_HIGH_COUNT;
+            duty = (state == `REVERSE) ? `PWM_LOW_COUNT : `PWM_HIGH_COUNT;
             col_r_en = ram_data[1];
             col_g_en = ram_data[2];
         end
         else begin
-            duty = `PWM_LOW_COUNT;
+            duty = (state == `REVERSE) ? `PWM_HIGH_COUNT : `PWM_LOW_COUNT;
             col_g_en = 1'b0;
             col_r_en = 1'b1;
         end
@@ -131,14 +131,10 @@ module led_driver (
             end
             default: begin
                 output_row = ~led_row; // ROW低电平驱动
-                if (state == `REVERSE) begin //TBD 应当放入RAM中
-                    output_col_r = led_col & {8{~col_g_en & pwm_out}};
-                    output_col_g = led_col & {8{~col_r_en & pwm_out}};
-                end
-                else begin
-                    output_col_r = led_col & {8{col_r_en & pwm_out}};
-                    output_col_g = led_col & {8{col_g_en & pwm_out}};
-                end
+
+                output_col_r = led_col & {8{col_r_en & pwm_out}};
+                output_col_g = led_col & {8{col_g_en & pwm_out}};
+
             end
         
         endcase         
