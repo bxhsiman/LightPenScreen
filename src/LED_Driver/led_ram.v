@@ -37,7 +37,7 @@ module led_ram (
     endfunction
 
     // state 切换检测
-    reg [2:0] state_d;
+    reg [3:0] state_d;
     always @(posedge clk or negedge rst_n) begin
         if (~rst_n) begin
             state_d <= 1'b0;
@@ -47,7 +47,7 @@ module led_ram (
     end
 
     // we 上升沿检测
-	 reg we_d;
+    reg we_d;
     always @(posedge clk) begin
         we_d <= we;
     end
@@ -72,20 +72,20 @@ module led_ram (
         if (state_d != state) begin
             for (i = 0; i < 8; i = i + 1) begin
                 for (j = 0; j < 8; j = j + 1) begin
-                    ram[i][j] = 4'b0000;  // 初始化为 0
+                    ram[i][j] <= 4'b0000;  // 初始化为 0
                 end
             end
-            col_d = 3'd0;
-            row_d = 3'd0;
+            col_d <= 3'd0;
+            row_d <= 3'd0;
         end
         // WE下降沿写入数据
         else if (we_d && ~we) begin                  
-            ram[bin_row_reg][bin_col_reg] = data_reg; 
-            col_d = bin_col_reg;
-            row_d = bin_row_reg; 
+            ram[bin_row_reg][bin_col_reg] <= data_reg; 
+            col_d <= bin_col_reg;
+            row_d <= bin_row_reg; 
         end
         // 读取当前地址的数据
-        led_data = ram[bin_row_reg][bin_col_reg];
+        led_data <= ram[bin_row_reg][bin_col_reg];
     end
 
 endmodule

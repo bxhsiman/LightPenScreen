@@ -5,12 +5,12 @@ module st (
     input rst,          // BTN0
     input state_change, // BTN1
 
-    output wire [2:0] state,
+    output wire [3:0] state,
     output wire [2:0] state_deep // 深层状态机
 );
 
     // 状态寄存器
-    reg [2:0] state_reg, state_next;
+    reg [3:0] state_reg, state_next;
     reg [2:0] state_deep_reg, state_deep_next;
 
     // 计数器
@@ -71,6 +71,10 @@ module st (
             `STOP: begin
                 // 保持STOP状态
                 state_next = `STOP;
+            end
+            `COLOR: begin
+                // 最后一个状态 跳转
+                state_next = (state_change_edge) ? `LIGHT : `COLOR;
             end
             default: begin
                 state_next = (state_change_edge) ? state_reg + 1 : state_reg;

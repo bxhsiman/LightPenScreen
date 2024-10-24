@@ -5,7 +5,7 @@
 module seg_driver(
     input wire clk,
 
-    input wire [2:0] state,
+    input wire [3:0] state,
     input wire [2:0] state_deep,
 
     input wire [2:0] row_d,
@@ -44,7 +44,7 @@ module seg_driver(
                 seg_en = 8'b1110_0000;
 			end
 			`LIGHT: begin
-				seg_value = {1'h1, 5'b0000_0,row_d, 5'b0000_0,col_d, 5'h0_0000};
+				seg_value = {4'h1, 1'b0,row_d, 1'b0,col_d, 20'h00000};
                 seg_en = 8'b1110_0000;
 			end
 			`DRAW: begin

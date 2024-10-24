@@ -9,8 +9,8 @@ module led_driver (
     input wire clk,            // 时钟输入
     input wire rst_n,          // 异步复位（低电平有效）
 
-    input wire [2:0] state,      // 状态机状态
-    input wire [2:0] state_deep, //二层状态机
+    input wire [3:0] state,      // 状态机状态
+    input wire [3:0] state_deep, //二层状态机
     
     input wire we,               //光笔输入信号
 
@@ -90,20 +90,20 @@ module led_driver (
     reg col_g_en;
     always @(*) begin
         if (ram_data[3] == 1'b1) begin
-            duty <= `PWM_HIGH_COUNT;
-            col_r_en <= ram_data[1];
-            col_g_en <= ram_data[2];
+            duty = `PWM_HIGH_COUNT;
+            col_r_en = ram_data[1];
+            col_g_en = ram_data[2];
         end
         else begin
             if (state == `DRAW) begin
-                duty <= `PWM_HIGH_COUNT;
-                col_g_en <= 1'b0;
-                col_r_en <= 1'b1;
+                duty = `PWM_HIGH_COUNT;
+                col_g_en = 1'b0;
+                col_r_en = 1'b1;
             end
             else begin
-                duty <= `PWM_LOW_COUNT;
-                col_g_en <= 1'b0;
-                col_r_en <= 1'b1;
+                duty = `PWM_LOW_COUNT;
+                col_g_en = 1'b0;
+                col_r_en = 1'b1;
             end
         end
     end

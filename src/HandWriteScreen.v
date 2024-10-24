@@ -50,8 +50,8 @@ module HandWriteScreen (
 	);
 
 	// st 模块信号
-	wire [2:0] state;      //表层状态机
-	wire [2:0] state_deep; //深层状态机
+	wire [3:0] state;      //表层状态机
+	wire [3:0] state_deep; //深层状态机
 
 	// 实例化 st 模块，并连接信号
 	st st_inst (
