@@ -44,15 +44,6 @@ module led_ram (
     end
     assign we_edge = ~we_d && we;
 
-    // we上升沿地址锁存
-    reg [7:0] addr_row_d, addr_col_d;
-    always @(posedge clk) begin
-        if (we_edge) begin
-            addr_row_d <= addr_row;
-            addr_col_d <= addr_col;
-        end
-    end
-
     // one-hot 二进制转换
     function [2:0] onehot_to_bin;
         input [7:0] onehot;
@@ -74,6 +65,15 @@ module led_ram (
     wire [2:0] bin_row, bin_col;
     assign bin_row = onehot_to_bin(addr_row);
     assign bin_col = onehot_to_bin(addr_col);
+
+    // we上升沿地址锁存
+    reg [2:0] bin_row_d, bin_col_d;
+    always @(posedge clk) begin
+        if (we_edge) begin
+            bin_row_d <= bin_row;
+            bin_col_d <= bin_col;
+        end
+    end
 
     // 状态切换检测
     reg [3:0] state_d;
@@ -153,9 +153,9 @@ module led_ram (
                 end else begin
                     // 其他状态下的写操作
                     if (we_d && ~we) begin // We 下降沿写入
-                        ram[{addr_row_d, addr_col_d}] <= data;
-                        col_d <= addr_row_d;
-                        row_d <= addr_col_d;
+                        ram[{bin_row_d, bin_col_d}] <= data;
+                        col_d <= bin_row_d;
+                        row_d <= bin_col_d;
                     end
                 end
             end
