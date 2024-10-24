@@ -68,30 +68,12 @@ module st (
                     time_counter_next = time_counter + 1;
                 end
             end
-            `SLEEP: begin
-                if (state_change_edge) state_next = `LIGHT;
-            end
-            `LIGHT: begin
-                if (state_change_edge) state_next = `DRAW;
-            end
-            `DRAW: begin
-                if (state_change_edge) state_next = `WRITE;
-            end
-            `WRITE: begin
-                if (state_change_edge) state_next = `ERASE;
-            end
-            `ERASE: begin
-                if (state_change_edge) state_next = `COLOR;
-            end
-            `COLOR: begin
-                if (state_change_edge) state_next = `LIGHT;
-            end
             `STOP: begin
                 // 保持STOP状态
                 state_next = `STOP;
             end
             default: begin
-                state_next = `STOP;
+                state_next = (state_change_edge) ? state_reg + 1 : state_reg;
             end
         endcase
     end

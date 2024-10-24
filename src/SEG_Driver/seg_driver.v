@@ -40,27 +40,31 @@ module seg_driver(
                 seg_en = 8'b1110_0000;
 			end
 			`LIGHT: begin
-				seg_value = 32'h0000_0001;
-                seg_en = 8'b1111_1111;
+				seg_value = 32'h1000_0000;
+                seg_en = 8'b1000_0000;
 			end
 			`DRAW: begin
-				seg_value = 32'h0000_0002;
-                seg_en = 8'b1111_1111;
+				seg_value = 32'h2000_0000;
+                seg_en = 8'b1000_0000;
 			end
 			`WRITE: begin
-				seg_value = 32'h0000_0003;
-                seg_en = 8'b1111_1111;
+				seg_value = 32'h3000_0000;
+                seg_en = 8'b1000_0000;
 			end
 			`ERASE: begin
-				seg_value = 32'h0000_0004;
+				seg_value = 32'h4000_0000;
                 seg_en = 8'b1111_1111;
 			end
+            `REVERSE: begin
+                seg_value = 32'h5000_0000;
+                seg_en = 8'b1000_0000;
+            end
 			`COLOR: begin
-				seg_value = 32'h0000_0005;
-                seg_en = 8'b1111_1111;
+				seg_value = 32'h6000_0000;
+                seg_en = 8'b1000_0000;
 			end
 			`STOP: begin
-				seg_value = 32'h0000_0007;
+				seg_value = 32'h8000_0000;
                 seg_en = 8'b1111_1111;
 			end
 			default: begin
