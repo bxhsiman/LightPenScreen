@@ -19,7 +19,7 @@ module led_driver (
     output reg [7:0] output_col_g,
 
     output wire [2:0] row_d,    // 刚写入的行地址
-    output wire [2:0] col_d    // 刚写入的列地址
+    output wire [2:0] col_d     // 刚写入的列地址
 
     //for test
     , output wire [3:0] ram_data_o
@@ -81,6 +81,7 @@ module led_driver (
         .addr_col(led_col),
         .we(we),
         .led_data(ram_data),
+        
         .col_d(col_d),
         .row_d(row_d)
     );

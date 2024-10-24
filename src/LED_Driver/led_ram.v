@@ -10,8 +10,9 @@ module led_ram (
     input wire we,             // 写使能
 
     output reg [3:0] led_data,  // LED 数据输出 
+
     output reg [2:0] col_d,     // 刚写入的列地址
-    output reg [2:0] row_d     // 刚写入的行地址
+    output reg [2:0] row_d      // 刚写入的行地址
 
 );
 
@@ -49,12 +50,15 @@ module led_ram (
     // we 上升沿检测
     reg we_d;
     always @(posedge clk) begin
-        we_d <= we;
+        if (state_d != state) begin
+            we_d <= 1'b0;
+        end else
+            we_d <= we;
     end
 
     // 在we的上升沿锁存地址和数据
-    always @(posedge clk or negedge rst_n) begin
-        if (~rst_n) begin
+    always @(posedge clk) begin
+        if (state_d != state) begin
             data_reg <= 4'd0;
             bin_row_reg <= 3'd0;
             bin_col_reg <= 3'd0;
@@ -72,7 +76,7 @@ module led_ram (
         if (state_d != state) begin
             for (i = 0; i < 8; i = i + 1) begin
                 for (j = 0; j < 8; j = j + 1) begin
-                    ram[i][j] <= 4'b0000;  // 初始化为 0
+                    ram[i][j] <= 4'b0;  // 初始化为 0
                 end
             end
             col_d <= 3'd0;
@@ -84,8 +88,12 @@ module led_ram (
             col_d <= bin_col_reg;
             row_d <= bin_row_reg; 
         end
-        // 读取当前地址的数据
-        led_data <= ram[bin_row_reg][bin_col_reg];
     end
+
+    // 显存读取
+    always @(*) begin
+        led_data = ram[onehot_to_bin(addr_row)][onehot_to_bin(addr_col)];
+    end
+
 
 endmodule
