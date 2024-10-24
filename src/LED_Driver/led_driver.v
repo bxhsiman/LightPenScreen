@@ -103,16 +103,15 @@ module led_driver (
         end
     end
 
-    reg [31:0] rst_cnt; //重启计数器
-    reg [2:0] rst_led_state; //led状态
-
     //LED组合逻辑
     always @(*) begin
-            output_row = 8'hFF;
-            output_col_r = 8'h00;
-            output_col_g = 8'h00;
+        // 默认值
+        output_row = 8'hFF;
+        output_col_r = 8'h00;
+        output_col_g = 8'h00;
         case (state)
             `STOP: begin
+                //暂停状态
                 output_row = 8'hFF;
                 output_col_r = 8'h00;
                 output_col_g = 8'h00;
@@ -131,11 +130,10 @@ module led_driver (
                     end
                 endcase
             end
-
             default: begin
-                output_row <= ~led_row; // ROW低电平驱动
-                output_col_r <= led_col & {8{col_r_en & pwm_out}};
-                output_col_g <= led_col & {8{col_g_en & pwm_out}};
+                output_row = ~led_row; // ROW低电平驱动
+                output_col_r = led_col & {8{col_r_en & pwm_out}};
+                output_col_g = led_col & {8{col_g_en & pwm_out}};
             end
         
         endcase         

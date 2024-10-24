@@ -76,6 +76,7 @@ module HandWriteScreen (
 		.clk(clk),
 		.rst_n(rst_n),
 		.state(state),
+		.state_deep(state_deep),
 		.we(we_n_o),
 		.output_row(output_row),
 		.output_col_r(output_col_r),

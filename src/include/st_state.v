@@ -19,9 +19,9 @@
 `define STATE_1 3'd1 //green
 `define STATE_2 3'd2 //red
 `define STATE_3 3'd3 //green
+`define STATE_4 3'd4 //next state
 
 
-
-`define STATE_MAX `STATE_3
+`define STATE_MAX `STATE_4
 
 `endif

@@ -17,19 +17,23 @@ module st (
     reg [31:0] time_counter, time_counter_next;
 
     // 边沿检测寄存器
-    reg state_change_sync0, state_change_sync1;
-    reg state_change_edge;
+    reg state_change_sync0, state_change_sync1, rst_sync0, rst_sync1;
+    reg state_change_edge, rst_edge;
 
-    // 同步并检测state_change的上升沿
+    // 同步检测上升沿
     always @(posedge clk) begin
         state_change_sync0 <= state_change;
         state_change_sync1 <= state_change_sync0;
         state_change_edge <= state_change_sync0 && !state_change_sync1;
+
+        rst_sync0 <= rst;
+        rst_sync1 <= rst_sync0;
+        rst_edge <= rst_sync0 && !rst_sync1;
     end
 
     // 状态机状态转换
-    always @(posedge clk or posedge rst) begin
-        if (rst) begin
+    always @(posedge clk) begin
+        if (rst_edge) begin
             // STOP RST 状态切换
             state_reg <= (state_reg == `STOP) ? `RST : `STOP;
             state_deep_reg <= `STATE_0;
