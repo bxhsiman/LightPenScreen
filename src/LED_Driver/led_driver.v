@@ -9,6 +9,8 @@ module led_driver (
     input wire clk,            // 时钟输入
     input wire rst_n,          // 异步复位（低电平有效）
 
+    input wire clean,          // 清屏信号
+
     input wire [3:0] state,      // 状态机状态
     input wire [3:0] state_deep, //二层状态机
     
@@ -61,7 +63,7 @@ module led_driver (
                 ram_write_data = { 1'b1 , 1'b0 , 1'b1 , 1'b0 }; //变亮
             end
             `ERASE: begin
-                ram_write_data = { 1'b1 , 1'b0 , 1'b0 , 1'b0 }; //变暗
+                ram_write_data = { 1'b0 , 1'b0 , 1'b0 , 1'b0 }; //变暗
             end
             `COLOR: begin
                 ram_write_data = { 1'b1, color, 1'b0 }; //选用选色
@@ -75,6 +77,7 @@ module led_driver (
     led_ram led_ram_inst (
         .clk(clk),
         .rst_n(rst_n),
+        .clean(clean),
         .state(state),
         .data(ram_write_data),
         .addr_row(led_row),

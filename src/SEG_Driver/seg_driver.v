@@ -55,14 +55,14 @@ module seg_driver(
 				seg_value = 32'h3000_0000;
                 seg_en = 8'b1000_0000;
 			end
-			`ERASE: begin
-				seg_value = 32'h4000_0000;
-                seg_en = 8'b1111_1111;
-			end
             `REVERSE: begin
-                seg_value = 32'h5000_0000;
+                seg_value = 32'h4000_0000;
                 seg_en = 8'b1000_0000;
             end
+			`ERASE: begin
+				seg_value = 32'h5000_0000;
+                seg_en = 8'b1000_0000;
+			end
 			`COLOR: begin
 				seg_value = 32'h6000_0000;
                 seg_en = 8'b1000_0000;

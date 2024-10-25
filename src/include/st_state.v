@@ -8,8 +8,9 @@
 `define LIGHT 4'd1 //点亮模式
 `define DRAW 4'd2  //划亮模式 //需要特殊开发 一同点亮！
 `define WRITE 4'd3 //写字模式
-`define ERASE 4'd4 //擦除模式
-`define REVERSE 4'd5 //反色模式
+`define REVERSE 4'd4 //反色模式
+
+`define ERASE 4'd5 //擦除模式
 `define COLOR 4'd6 //取色模式
 
 `define RST 4'd7

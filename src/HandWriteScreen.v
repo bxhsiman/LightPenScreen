@@ -6,6 +6,8 @@ module HandWriteScreen (
 	input btn0, // 系统初始化用
 	input btn1, // 系统状态切换
 
+	input btn7, // 清屏确认用
+
 	input wire we, // 光笔输入信号
 
 	output wire [7:0] cat_o,
@@ -23,16 +25,6 @@ module HandWriteScreen (
 	assign rst_n = ~rst;
 	assign we_n = we; //三极管信号需要反转
 
-	wire we_n_o;
-	// 光笔消抖模块
-	btn we_inst (
-		.clk(clk),
-		.rst_n(rst_n),
-		.button_in(we_n),
-		.button_out(we_n_o)
-	);
-
-
 	wire btn0_o, btn1_o; 
 	// 按钮消抖模块
 	btn btn0_inst (
@@ -47,6 +39,13 @@ module HandWriteScreen (
 		.rst_n(rst_n),
 		.button_in(btn1),
 		.button_out(btn1_o)
+	);
+
+	btn btn7_inst (
+		.clk(clk),
+		.rst_n(rst_n),
+		.button_in(btn7),
+		.button_out(btn7_o)
 	);
 
 	// st 模块信号
@@ -81,9 +80,10 @@ module HandWriteScreen (
 	led_driver led (
 		.clk(clk),
 		.rst_n(rst_n),
+		.clean(btn7_o),
 		.state(state),
 		.state_deep(state_deep),
-		.we(we_n_o),
+		.we(we_n),
 		.output_row(output_row),
 		.output_col_r(output_col_r),
 		.output_col_g(output_col_g),

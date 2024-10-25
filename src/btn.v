@@ -5,9 +5,9 @@ module btn (
     output reg button_out
 );
 
-    parameter MAX_COUNT = 80;
+    parameter MAX_COUNT = 80; //max : 256
 
-    reg [19:0] counter; 
+    reg [7:0] counter; 
     reg button_sync0, button_sync1;
 
     // 移位器消除亚稳态
