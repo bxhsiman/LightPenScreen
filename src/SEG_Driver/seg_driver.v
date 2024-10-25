@@ -69,7 +69,7 @@ module seg_driver(
 			end
 			`STOP: begin
 				seg_value = 32'h8000_0000;
-                seg_en = 8'b1111_1111;
+                seg_en = 8'b0000_0000;
 			end
 			default: begin
 				seg_value = 32'hFFFF_FFFF;

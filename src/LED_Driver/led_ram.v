@@ -100,6 +100,12 @@ module led_ram (
 
         end else begin
             if (state_d != state) begin
+                //状态切换
+                integer i;
+                for(i=0;i<64;i=i+1) begin
+                    ram[i] <= 4'b0;
+                end
+					 
                 col_d <= 3'd0;
                 row_d <= 3'd0;
 
@@ -109,8 +115,6 @@ module led_ram (
                 draw_timer   <= 26'd0;
                 buffer_empty <= 1'b1;
                 buffer_full  <= 1'b0;
-
-                // 清空RAM TBD
 
             end else begin
                 if (state == `DRAW) begin
