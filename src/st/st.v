@@ -4,6 +4,7 @@ module st (
     input clk,
     input rst,          // BTN0
     input state_change, // BTN1
+    input state_color,  // BTN2
 
     output wire [3:0] state,
     output wire [2:0] state_deep // 深层状态机
@@ -17,8 +18,8 @@ module st (
     reg [31:0] time_counter, time_counter_next;
 
     // 边沿检测寄存器
-    reg state_change_sync0, state_change_sync1, rst_sync0, rst_sync1;
-    reg state_change_edge, rst_edge;
+    reg state_change_sync0, state_change_sync1, rst_sync0, rst_sync1, state_color_sync0, state_color_sync1;
+    reg state_change_edge, rst_edge, state_color_edge;
 
     // 同步检测上升沿
     always @(posedge clk) begin
@@ -29,6 +30,10 @@ module st (
         rst_sync0 <= rst;
         rst_sync1 <= rst_sync0;
         rst_edge <= rst_sync0 && !rst_sync1;
+
+        state_color_sync0 <= state_color;
+        state_color_sync1 <= state_color_sync0;
+        state_color_edge <= state_color_sync0 && !state_color_sync1;
     end
 
     // 状态机状态转换
@@ -72,12 +77,17 @@ module st (
                 // 保持STOP状态
                 state_next = `STOP;
             end
-            `COLOR: begin
+            `ERASE: begin
                 // 最后一个状态 跳转
-                state_next = (state_change_edge) ? `LIGHT : `COLOR;
+                state_next = (state_change_edge) ? `LIGHT : `ERASE;
             end
             default: begin
-                state_next = (state_change_edge) ? state_reg + 1 : state_reg;
+                if (state_color_edge) begin
+                    // 颜色选择
+                    state_next = (state_reg == `COLOR) ? `DRAW : `COLOR;
+                end else begin
+                    state_next = (state_change_edge) ? state_reg + 1 : state_reg;
+                end
             end
         endcase
     end

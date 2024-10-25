@@ -51,22 +51,34 @@ module led_driver (
     );
 
     // 光笔选色器
-    wire [1:0] color = 2'b0;          //当前选中的颜色 TBD
+    reg [1:0] color;          //当前选中的颜色 
+    always @(*) begin
+        if(we) begin
+            if (led_row == `RED_ROW && led_col == `RED_COL) begin
+                color = `RED;
+            end
+            else if (led_row == `GREEN_ROW && led_col == `GREEN_COL) begin
+                color = `GREEN;
+            end
+            else if (led_row == `YELLOW_ROW && led_col == `YELLOW_COL) begin
+                color = `YELLOW;
+            end
+            else begin
+                color = color;
+            end
+        end
+        
+    end
 
-    //LED 显存 读写
+    //RAM写入
     reg [3:0] ram_write_data;  //待写入
-    wire [3:0] ram_data;       //读出
-
     always @(*) begin
         case(state)
             `LIGHT, `DRAW, `WRITE: begin
-                ram_write_data = { 1'b1 , 1'b0 , 1'b1 , 1'b0 }; //变亮
+                ram_write_data = { 1'b1 ,color , 1'b0 }; //变亮
             end
             `ERASE: begin
                 ram_write_data = { 1'b0 , 1'b0 , 1'b0 , 1'b0 }; //变暗
-            end
-            `COLOR: begin
-                ram_write_data = { 1'b1, color, 1'b0 }; //选用选色
             end
         default: begin
             ram_write_data = ram_data; // RST SLEEP 等模式 保留原始值
@@ -74,6 +86,8 @@ module led_driver (
         endcase
     end
 
+    // RAM 读取
+    wire [3:0] ram_data;       //读出
     led_ram led_ram_inst (
         .clk(clk),
         .rst_n(rst_n),
@@ -132,9 +146,28 @@ module led_driver (
                     end
                 endcase
             end
+            `COLOR: begin
+                output_row = ~led_row; // ROW低电平驱动
+                if (led_row == `RED_ROW && led_col == `RED_COL) begin
+                    output_col_r = led_col; //直接点亮
+                    output_col_g = 8'h00;   //熄灭
+                end
+                else if (led_row == `GREEN_ROW && led_col == `GREEN_COL) begin
+                    output_col_r = led_col & {8{col_r_en & pwm_out}};   //扫描
+                    output_col_g = led_col; //直接点亮
+                end
+                else if (led_row == `YELLOW_ROW && led_col == `YELLOW_COL)begin
+                    output_col_r = led_col;   //点亮
+                    output_col_g = led_col;   //点亮
+                end
+                else begin
+                    output_col_r = led_col & {8{col_r_en & pwm_out}};
+                    output_col_g = led_col & {8{col_g_en & pwm_out}};
+                end
+                
+            end
             default: begin
                 output_row = ~led_row; // ROW低电平驱动
-
                 output_col_r = led_col & {8{col_r_en & pwm_out}};
                 output_col_g = led_col & {8{col_g_en & pwm_out}};
 

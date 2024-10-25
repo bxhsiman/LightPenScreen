@@ -1,10 +1,11 @@
 `include "st_state.v"
 module HandWriteScreen (
 	input clk,
-	input rst,
+	input rst,  // 复位 待删除
 
 	input btn0, // 系统初始化用
 	input btn1, // 系统状态切换
+	input btn2, // 系统颜色切换
 
 	input btn7, // 清屏确认用
 
@@ -25,7 +26,8 @@ module HandWriteScreen (
 	assign rst_n = ~rst;
 	assign we_n = we; //三极管信号需要反转
 
-	wire btn0_o, btn1_o; 
+	wire btn0_o, btn1_o, btn2_o, btn7_o; 
+
 	// 按钮消抖模块
 	btn btn0_inst (
 		.clk(clk),
@@ -39,6 +41,13 @@ module HandWriteScreen (
 		.rst_n(rst_n),
 		.button_in(btn1),
 		.button_out(btn1_o)
+	);
+
+	btn btn2_inst (
+		.clk(clk),
+		.rst_n(rst_n),
+		.button_in(btn2),
+		.button_out(btn2_o)
 	);
 
 	btn btn7_inst (
@@ -57,6 +66,7 @@ module HandWriteScreen (
 		.clk(clk),
 		.rst(btn0_o),
 		.state_change(btn1_o),
+		.state_color(btn2_o),
 		.state(state),
 		.state_deep(state_deep)
 	);
