@@ -8,6 +8,8 @@ module seg_driver(
     input wire [3:0] state,
     input wire [2:0] state_deep,
 
+    input wire [1:0] color,
+
     input wire [2:0] row_d,
     input wire [2:0] col_d,
 
@@ -64,8 +66,8 @@ module seg_driver(
                 seg_en = 8'b1000_0000;
 			end
 			`COLOR: begin
-				seg_value = 32'h6000_0000;
-                seg_en = 8'b1000_0000;
+				seg_value = {24'h6000_00, 6'b0, color};
+                seg_en = 8'b1000_0011;
 			end
 			`STOP: begin
 				seg_value = 32'h8000_0000;

@@ -80,13 +80,15 @@ module HandWriteScreen (
 		// 点亮mode功能所需信号
 		.row_d(row_d),
 		.col_d(col_d),
-		
+		// 颜色选择
+		.color(color),
     	.cat(cat_o),        
     	.seg(seg_o)        
 	);
 	
 	// 实例化 led_driver 模块
 	wire [2:0] row_d, col_d;
+	wire [1:0] color;
 	led_driver led (
 		.clk(clk),
 		.rst_n(rst_n),
@@ -99,7 +101,9 @@ module HandWriteScreen (
 		.output_col_g(output_col_g),
 
 		.row_d(row_d),
-		.col_d(col_d)
+		.col_d(col_d),
+
+		.color(color)
 
 		,.ram_data_o(test_led[4:1])
 	);

@@ -20,8 +20,10 @@ module led_driver (
     output reg [7:0] output_col_r,
     output reg [7:0] output_col_g,
 
-    output wire [2:0] row_d,    // 刚写入的行地址
-    output wire [2:0] col_d     // 刚写入的列地址
+    output wire [2:0] row_d,     // 刚写入的行地址
+    output wire [2:0] col_d,     // 刚写入的列地址
+
+    output reg [1:0] color      // 当前选中颜色
 
     //for test
     , output wire [3:0] ram_data_o
@@ -51,31 +53,46 @@ module led_driver (
     );
 
     // 光笔选色器
-    reg [1:0] color;          //当前选中的颜色 
-    always @(*) begin
-        if(we) begin
-            if (led_row == `RED_ROW && led_col == `RED_COL) begin
-                color = `RED;
-            end
-            else if (led_row == `GREEN_ROW && led_col == `GREEN_COL) begin
-                color = `GREEN;
-            end
-            else if (led_row == `YELLOW_ROW && led_col == `YELLOW_COL) begin
-                color = `YELLOW;
-            end
-            else begin
-                color = color;
-            end
+   always @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            color <= `RED;
+        end else begin
+            case(state) 
+                `COLOR: begin
+                    if(we) begin
+                        if (led_row == `RED_ROW && led_col == `RED_COL) begin
+                            color <= `RED;
+                        end
+                        else if (led_row == `GREEN_ROW && led_col == `GREEN_COL) begin
+                            color <= `GREEN;
+                        end
+                        else if (led_row == `YELLOW_ROW && led_col == `YELLOW_COL) begin
+                            color <= `YELLOW;
+                        end
+                        else begin
+                            color <= color;
+                        end
+                    end else begin
+                        color <= color;
+                    end
+                end
+                `RST: begin
+                    color <= `RED;
+                end
+                default: begin
+                    color <= color;
+                end
+            endcase
         end
-        
     end
+
 
     //RAM写入
     reg [3:0] ram_write_data;  //待写入
     always @(*) begin
         case(state)
             `LIGHT, `DRAW, `WRITE: begin
-                ram_write_data = { 1'b1 ,color , 1'b0 }; //变亮
+                ram_write_data = { 1'b1 , color , 1'b0 }; //变亮
             end
             `ERASE: begin
                 ram_write_data = { 1'b0 , 1'b0 , 1'b0 , 1'b0 }; //变暗

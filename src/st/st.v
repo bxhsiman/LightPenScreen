@@ -84,8 +84,8 @@ module st (
             default: begin
                 if (state_color_edge) begin
                     // 颜色选择
-                    state_next = (state_reg == `COLOR) ? `DRAW : `COLOR;
-                end else begin
+                    state_next = (state_reg == `COLOR) ? `LIGHT : `COLOR;
+                end else if (state_reg != `COLOR)begin
                     state_next = (state_change_edge) ? state_reg + 1 : state_reg;
                 end
             end
