@@ -1,6 +1,6 @@
 // led 相关参数
 `define PWM_COUNT 499
-`define PWM_LOW_COUNT 50
+`define PWM_LOW_COUNT 20
 `define PWM_HIGH_COUNT 498
 `define PWM_OFF 0
 

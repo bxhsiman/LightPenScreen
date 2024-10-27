@@ -11,12 +11,22 @@ module HandWriteScreen (
 
 	input wire we, // 光笔输入信号
 
+	// 数码管显示
 	output wire [7:0] cat_o,
 	output wire [7:0] seg_o,
-
+	
+	// LED显示
 	output wire [7:0] output_row,
 	output wire [7:0] output_col_r,
-	output wire [7:0] output_col_g
+	output wire [7:0] output_col_g,
+
+	// LCD显示
+	output wire [7:0] data_o,
+	output wire reset_n_o,
+	output wire cs_n_o,
+	output wire wr_n_o,
+	output wire rd_n_o,
+	output wire a0_o
 
 	//for test
 	, output wire [15:0] test_led
@@ -24,7 +34,18 @@ module HandWriteScreen (
 	);
 
 	assign rst_n = ~rst;
-	assign we_n = we; //三极管信号需要反转
+	assign we_n = ~we; //三极管信号需要反转
+
+	test_lcd test_lcd_inst (
+		.clk(clk),
+		.reset(rst),
+		.data(data_o),
+		.reset_n(reset_n_o),
+		.cs_n(cs_n_o),
+		.wr_n(wr_n_o),
+		.rd_n(rd_n_o),
+		.a0(a0_o)
+	);
 
 	wire btn0_o, btn1_o, btn2_o, btn7_o; 
 
