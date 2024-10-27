@@ -36,9 +36,16 @@ module HandWriteScreen (
 	assign rst_n = ~rst;
 	assign we_n = ~we; //三极管信号需要反转
 
+	wire [7:0] addr_row;
+	wire [7:0] addr_col;
+	wire [3:0] led_data;
+
 	test_lcd test_lcd_inst (
 		.clk(clk),
 		.reset(rst),
+		.addr_row(addr_row),
+		.addr_col(addr_col),
+		.led_data(led_data),
 		.data(data_o),
 		.reset_n(reset_n_o),
 		.cs_n(cs_n_o),
@@ -117,6 +124,11 @@ module HandWriteScreen (
 		.state(state),
 		.state_deep(state_deep),
 		.we(we_n),
+
+		.addr_row(addr_row),
+		.addr_col(addr_col),
+		.led_data_o(led_data),
+
 		.output_row(output_row),
 		.output_col_r(output_col_r),
 		.output_col_g(output_col_g),

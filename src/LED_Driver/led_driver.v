@@ -16,6 +16,10 @@ module led_driver (
     
     input wire we,               //光笔输入信号
 
+    output wire [7:0] addr_row, //扫描行
+    output wire [7:0] addr_col, //扫描列
+    output wire [3:0] led_data_o, //LED数据
+
     output reg [7:0] output_row,
     output reg [7:0] output_col_r,
     output reg [7:0] output_col_g,
@@ -35,6 +39,9 @@ module led_driver (
     wire [7:0] led_col;
     wire pwm_out;
 
+    assign addr_row = led_row; //输出用
+    assign addr_col = led_col; 
+    assign led_data_o = ram_data;
 
     // PWM亮度调整模块
     pwm_generator pwm_generator_inst (

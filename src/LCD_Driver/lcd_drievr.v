@@ -3,6 +3,11 @@
 module test_lcd(
     input clk,          // System clock
     input reset,        // System reset
+    
+    input [7:0] addr_row, // one-hot 
+    input [7:0] addr_col, //one-hot 
+    input [3:0] led_data, // LED data output 
+
     output lcd_ok,      // LCD ready signal
     output [7:0] data,  // Data output to LCD
     output reset_n,     // LCD reset
@@ -11,6 +16,44 @@ module test_lcd(
     output rd_n,        // Read control
     output a0           // Register select
 );
+    // one-hot 二进制转换
+    function [2:0] onehot_to_bin;
+        input [7:0] onehot;
+        begin
+            case (onehot)
+                8'b0000_0001: onehot_to_bin = 3'd0;
+                8'b0000_0010: onehot_to_bin = 3'd1;
+                8'b0000_0100: onehot_to_bin = 3'd2;
+                8'b0000_1000: onehot_to_bin = 3'd3;
+                8'b0001_0000: onehot_to_bin = 3'd4;
+                8'b0010_0000: onehot_to_bin = 3'd5;
+                8'b0100_0000: onehot_to_bin = 3'd6;
+                8'b1000_0000: onehot_to_bin = 3'd7;
+                default:       onehot_to_bin = 3'd0;
+            endcase
+        end
+    endfunction
+
+    //row反转func
+    function [2:0] reverse_row;
+        input [2:0] row;
+        begin
+            case(row)
+                3'd7: reverse_row = 3'd0;
+                3'd6: reverse_row = 3'd1;
+                3'd5: reverse_row = 3'd2;
+                3'd4: reverse_row = 3'd3;
+                3'd3: reverse_row = 3'd4;
+                3'd2: reverse_row = 3'd5;
+                3'd1: reverse_row = 3'd6;
+                3'd0: reverse_row = 3'd7;    
+            endcase
+        end
+    endfunction
+
+    wire [2:0] bin_row, bin_col;
+    assign bin_row = onehot_to_bin(addr_row);
+    assign bin_col = onehot_to_bin(addr_col);
 
     wire [3:0] pos_x;      // Position X
     wire [3:0] pos_y;      // Position Y
@@ -34,7 +77,6 @@ module test_lcd(
         .a0_o(a0)
     );
 
-    // Generate position and character indices to display "1234567"
     reg [3:0] x_pos = 0;
     reg [3:0] y_pos = 0;
     reg [3:0] current_char = 1;
@@ -45,7 +87,9 @@ module test_lcd(
 
     reg [2:0] state = 0;
 
-    // State machine to cycle through displaying "1234567"
+    reg [0:63] data_d;
+
+    // 0-clean screen 1-scan
     always @(posedge clk or posedge reset) begin
         if (reset) begin
             x_pos <= 0;
@@ -55,7 +99,7 @@ module test_lcd(
         end else if (lcd_ok) begin
             case(state)
                 0: begin
-                     if (x_pos < 15) begin
+                    if (x_pos < 15) begin
                         x_pos <= x_pos + 1;
                         char_show <= 1;
                     end else if (y_pos < 15) begin
@@ -64,23 +108,25 @@ module test_lcd(
                         char_show <= 1;
                     end
                     else begin
-                        x_pos <= 2;
-                        y_pos <= 2;
+                        x_pos <= 4;
+                        y_pos <= 0;
                         current_char <= 1;
                         char_show <= 1;
                         state <= 1;
                     end
                 end 
                 1: begin
-                    if (current_char < 3) begin
-                        current_char <= current_char + 1;
-                        x_pos <= x_pos + 2;
+                    if(led_data[3] == 1'b1) begin
+                        x_pos <= onehot_to_bin(addr_col) + 4;
+                        y_pos <= reverse_row(onehot_to_bin(addr_row));
+                        current_char <= 1; 
                         char_show <= 1;
                     end
                     else begin
-                        current_char <= 1;
-                        char_show <= 0;
-                        state <= 2;
+                        x_pos <= onehot_to_bin(addr_col) + 4;
+                        y_pos <= reverse_row(onehot_to_bin(addr_row));
+                        current_char <= 2;
+                        char_show <= 1;
                     end
                 end
                 default: state <= 2;
